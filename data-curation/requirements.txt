@@ -1,0 +1,9 @@
+Flask
+Flask-Cors
+Flask-Caching
+rdflib
+flake8
+pytest
+gitpython
+panda
+logging
