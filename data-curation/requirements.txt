@@ -5,5 +5,7 @@ rdflib
 flake8
 pytest
 gitpython
-panda
+pandas
 logging
+configparser
+tabulate
