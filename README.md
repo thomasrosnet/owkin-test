@@ -1,1 +1,1 @@
-# owkin-test
+# Owkin test project
