@@ -9,3 +9,4 @@ pandas
 logging
 configparser
 tabulate
+black
