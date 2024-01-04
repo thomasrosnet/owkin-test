@@ -8,6 +8,7 @@ class Validator:
     """
 
     df_column = ""
+    df_column_name = ""
 
     date_score = ""
     int_score = ""
@@ -18,14 +19,19 @@ class Validator:
     guessed_type = ""
     max_score = ""
     incorrect_miss = ""
+    missing_count = ""
+    incorrect_count = ""
+    incorrect = ""
     score_summary = ""
 
     alpha_unique = []
-    int_stats = {}
-    float_stats = {}
+    column_describe = {}
 
     def __init__(self, df_column):
         self.df_column = df_column
+        self.df_column_name = df_column.name
+
+        self.missing_count = self.df_column.apply(self.is_missing).sum()
 
         self.date_score = self.df_column.apply(self.validate_date).sum()
         self.int_score = self.df_column.apply(self.validate_int).sum()
@@ -35,8 +41,26 @@ class Validator:
 
         self.score_summary()
 
-    def columns_parser(self):
+        self.count_incorrect()
+        self.select_incorrect()
+        print(self.incorrect)
+
+    def select_missing(self):
         pass
+
+    def select_incorrect(self):
+        match self.guessed_type:
+            case "Date":
+                self.incorrect = self.df_column[~self.df_column.apply(self.validate_date)].to_dict()
+            case "Int":
+                self.incorrect = self.df_column[~self.df_column.apply(self.validate_int)].to_dict()
+            case "Float":
+                self.incorrect = self.df_column[~self.df_column.apply(self.validate_float)].to_dict()
+            case "Alpha":
+                self.incorrect = self.df_column[~self.df_column.apply(self.validate_alpha)].to_dict()
+            case "Boolean":
+                self.incorrect = self.df_column[~self.df_column.apply(self.validate_bool)].to_dict()
+
 
     def score_summary(self):
         summary = {
@@ -58,15 +82,28 @@ class Validator:
 
         if self.guessed_type == "Alpha":
             self.alpha_unique = self.df_column.unique()
+            self.column_describe = self.df_column.describe().to_dict()
 
         if self.guessed_type == "Int":
-            self.int_stats = self.df_column.describe().to_dict()
+            self.column_describe = self.df_column.describe().to_dict()
 
         if self.guessed_type == "Float":
-            self.float_stats = self.df_column.describe().to_dict()
+            self.column_describe = self.df_column.describe().to_dict()
+
+        # print(self.column_describe)
+
+    def is_missing(self, value):
+        return pandas.isna(value)
+    
+    def count_incorrect(self):
+        self.incorrect_count = self.incorrect_miss - self.missing_count
+
+
 
     def validate_date(self, value):
-        # date = input('Date (mm/dd/yyyy): ')
+        if pandas.isna(value):
+            return False
+
         if type(value) is str:
             try:
                 time.strptime(value, "%d/%m/%Y")
@@ -76,6 +113,9 @@ class Validator:
         return False
 
     def validate_int(self, value):
+        if pandas.isna(value):
+            return False
+
         if type(value) is int:
             return True
         if type(value) is str:
@@ -83,6 +123,9 @@ class Validator:
         return False
 
     def validate_float(self, value):
+        if pandas.isna(value):
+            return False
+
         if type(value) is float:
             return True
         if type(value) is str:
@@ -90,7 +133,11 @@ class Validator:
         return False
 
     def validate_alpha(self, value):
+        if pandas.isna(value):
+            return False
+
         if type(value) is str:
+            value = value.replace(" ", "")
             if value.isalpha():
                 return True
             if value.replace("+", "").isalpha():
@@ -98,6 +145,9 @@ class Validator:
         return False
 
     def validate_bool(self, value):
+        if pandas.isna(value):
+            return False
+
         if type(value) is bool:
             return True
         if type(value) is str:
@@ -127,9 +177,15 @@ class Validator:
 
     def get_incorrect_miss(self):
         return self.incorrect_miss
+    
+    def get_incorrect(self):
+        return self.get_incorrect
+    
+    def to_json(self):
+        pass
 
     def __str__(self):
-        str = f"{self.guessed_type} | {self.max_score} | {self.incorrect_miss}"
+        str = f"{self.df_column_name}:\t {self.guessed_type} | {self.max_score} | {self.incorrect_count} | {self.missing_count}"
         return str
 
     # def guess_types_from_df(self, df):

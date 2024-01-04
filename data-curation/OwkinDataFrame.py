@@ -26,28 +26,31 @@ class OwkinDataFrame:
     dataframe = ""
     # types_guess = ""
     json_dataframe = ""
-    nb_row = ""
+    nb_rows = ""
     nb_columns = ""
     header_list = ""
     types_columns = ""
-    missing_values = ""
+    nb_missing_values = ""
 
     df_notnull = ""
 
-    df_metadata = ""
+    df_json_metadata = {}
 
     def __init__(self, csv):
         self.dataframe = self.readcsv_panda(csv)
 
         self.nb_columns = len(self.dataframe.columns)
-        self.nb_row = len(self.dataframe)
+        self.nb_rows = len(self.dataframe)
         self.types_columns = self.dataframe.dtypes
         self.json_dataframe = self.dataframe.transpose().to_json()
 
         self.df_notnull = self.dataframe.count().to_json()
 
         self.header_list = self.dataframe.columns.values.tolist()
-        # self.missing_values = self.dataframe.isnull.sum()
+        self.nb_missing_values = self.dataframe.isna().sum().sum()
+
+        self.summary_to_json()
+
 
     def readcsv_panda(self, csv_path):
         # data_folder = "../data/"
@@ -65,12 +68,28 @@ class OwkinDataFrame:
 
         return df
 
+    def summary_to_json(self):
+        self.df_json_metadata = {
+            "nb_rows": self.nb_rows,
+            "nb_columns": self.nb_columns,
+            "nb_missing_values": self.nb_missing_values,
+            "header_list": self.header_list,
+            "columns_report": {},
+            "rows_report": {}
+        }
+
     def guess_types_col(self):
         df = self.dataframe
 
+        col_name_type = {}
+
         for col_name in self.header_list:
             column_info = Validator(df[col_name])
-            print(column_info)
+            # print(column_info)
+            col_name_type[col_name] = column_info.get_guessed_type()
+
+        print(col_name_type)
+
 
     def get_panda_dataframe(self):
         return self.dataframe
@@ -78,8 +97,8 @@ class OwkinDataFrame:
     # def get_types_guess(self):
     #     return self.types_guess
 
-    def get_nb_row(self):
-        return self.nb_row
+    def get_nb_rows(self):
+        return self.nb_rows
 
     def get_nb_columns(self):
         return self.nb_columns
@@ -90,11 +109,14 @@ class OwkinDataFrame:
     def get_df_info(self):
         return self.dataframe.info()
 
-    def get_df_missing(self):
-        return self.missing_values
+    def get_nb_missing(self):
+        return self.nb_missing_values
 
     def get_json_df(self):
         return self.json_dataframe
 
     def get_not_null(self):
         return self.df_notnull
+    
+    def get_json_summary(self):
+        return self.df_json_metadata
