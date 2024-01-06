@@ -33,6 +33,9 @@ class OwkinDataFrame:
     nb_missing_values = ""
     col_name_type = {}
 
+    row_threshold = 0.1
+    col_threshold = 0.1
+
     df_notnull = ""
 
     df_json_metadata = {}
@@ -50,10 +53,14 @@ class OwkinDataFrame:
         self.header_list = self.dataframe.columns.values.tolist()
         self.nb_missing_values = self.dataframe.isna().sum().sum()
 
-
+        # general summary
         self.summary_to_json()
+
+        # col summary + guess type
         self.guess_types_col()
-        self.validate_row(self.dataframe)
+
+        # row summary
+        self.validate_rows(self.dataframe)
 
 
     def readcsv_panda(self, csv_path):
@@ -94,12 +101,41 @@ class OwkinDataFrame:
 
         self.col_name_type = col_name_type
 
-    def validate_row(self, df):
+    def validate_rows(self, df):
 
+        rows_quality = {}
         for index, row in df.iterrows():
+            nb_valid = 0
+            nb_invalid = 0
             for col_name in self.col_name_type.keys():
-                print(f"Type: {self.col_name_type[col_name]} Value: {row[col_name]}")
+                # print(f"Type: {self.col_name_type[col_name]} Value: {row[col_name]}")
                 # Call validate methods here
+                match self.col_name_type[col_name]:
+                    case "Date":
+                        is_valid = Validator.validate_date(row[col_name])
+                    case "Int":
+                        is_valid = Validator.validate_int(row[col_name])
+                    case "Float":
+                        is_valid = Validator.validate_float(row[col_name])
+                    case "Alpha":
+                        is_valid = Validator.validate_alpha(row[col_name])
+                    case "Boolean":
+                        is_valid = Validator.validate_bool(row[col_name])
+                if is_valid:
+                    nb_valid += 1
+                else:
+                    nb_invalid += 1
+
+            is_row_valid = bool(nb_invalid == 0)
+
+            row_summary = {
+                "nb_valid": nb_valid,
+                "nb_invalid": nb_invalid,
+                "is_row_valid": is_row_valid
+            }
+            rows_quality[index] = row_summary
+        
+        print(rows_quality)
                 
 
 
