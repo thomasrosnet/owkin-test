@@ -31,6 +31,7 @@ class OwkinDataFrame:
     header_list = ""
     types_columns = ""
     nb_missing_values = ""
+    col_name_type = {}
 
     df_notnull = ""
 
@@ -49,7 +50,10 @@ class OwkinDataFrame:
         self.header_list = self.dataframe.columns.values.tolist()
         self.nb_missing_values = self.dataframe.isna().sum().sum()
 
+
         self.summary_to_json()
+        self.guess_types_col()
+        self.validate_row(self.dataframe)
 
 
     def readcsv_panda(self, csv_path):
@@ -88,7 +92,15 @@ class OwkinDataFrame:
             # print(column_info)
             col_name_type[col_name] = column_info.get_guessed_type()
 
-        print(col_name_type)
+        self.col_name_type = col_name_type
+
+    def validate_row(self, df):
+
+        for index, row in df.iterrows():
+            for col_name in self.col_name_type.keys():
+                print(f"Type: {self.col_name_type[col_name]} Value: {row[col_name]}")
+                # Call validate methods here
+                
 
 
     def get_panda_dataframe(self):

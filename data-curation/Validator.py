@@ -33,11 +33,11 @@ class Validator:
 
         self.missing_count = self.df_column.apply(self.is_missing).sum()
 
-        self.date_score = self.df_column.apply(self.validate_date).sum()
-        self.int_score = self.df_column.apply(self.validate_int).sum()
-        self.float_score = self.df_column.apply(self.validate_float).sum()
-        self.alpha_score = self.df_column.apply(self.validate_alpha).sum()
-        self.bool_score = self.df_column.apply(self.validate_bool).sum()
+        self.date_score = self.df_column.apply(Validator.validate_date).sum()
+        self.int_score = self.df_column.apply(Validator.validate_int).sum()
+        self.float_score = self.df_column.apply(Validator.validate_float).sum()
+        self.alpha_score = self.df_column.apply(Validator.validate_alpha).sum()
+        self.bool_score = self.df_column.apply(Validator.validate_bool).sum()
 
         self.score_summary()
 
@@ -99,8 +99,8 @@ class Validator:
         self.incorrect_count = self.incorrect_miss - self.missing_count
 
 
-
-    def validate_date(self, value):
+    @staticmethod
+    def validate_date(value):
         if pandas.isna(value):
             return False
 
@@ -112,7 +112,8 @@ class Validator:
                 return False
         return False
 
-    def validate_int(self, value):
+    @staticmethod
+    def validate_int(value):
         if pandas.isna(value):
             return False
 
@@ -122,7 +123,8 @@ class Validator:
             return value.isdigit()
         return False
 
-    def validate_float(self, value):
+    @staticmethod
+    def validate_float(value):
         if pandas.isna(value):
             return False
 
@@ -132,7 +134,8 @@ class Validator:
             return value.replace(".", "").isdigit() and "." in value
         return False
 
-    def validate_alpha(self, value):
+    @staticmethod
+    def validate_alpha(value):
         if pandas.isna(value):
             return False
 
@@ -144,7 +147,8 @@ class Validator:
                 return True
         return False
 
-    def validate_bool(self, value):
+    @staticmethod
+    def validate_bool(value):
         if pandas.isna(value):
             return False
 
