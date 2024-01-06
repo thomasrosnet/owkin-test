@@ -107,8 +107,9 @@ class OwkinDataFrame:
         for index, row in df.iterrows():
             nb_valid = 0
             nb_invalid = 0
+            invalid_values = {}
             for col_name in self.col_name_type.keys():
-                # print(f"Type: {self.col_name_type[col_name]} Value: {row[col_name]}")
+                
                 # Call validate methods here
                 match self.col_name_type[col_name]:
                     case "Date":
@@ -125,13 +126,15 @@ class OwkinDataFrame:
                     nb_valid += 1
                 else:
                     nb_invalid += 1
+                    invalid_values[col_name] = row[col_name]
 
             is_row_valid = bool(nb_invalid == 0)
 
             row_summary = {
                 "nb_valid": nb_valid,
                 "nb_invalid": nb_invalid,
-                "is_row_valid": is_row_valid
+                "is_row_valid": is_row_valid,
+                "invalid_values": invalid_values
             }
             rows_quality[index] = row_summary
         

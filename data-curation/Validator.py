@@ -98,6 +98,9 @@ class Validator:
     def count_incorrect(self):
         self.incorrect_count = self.incorrect_miss - self.missing_count
 
+    #TODO write the column summary in json serialized format
+    def json_serialize(self):
+        pass
 
     @staticmethod
     def validate_date(value):
@@ -185,7 +188,7 @@ class Validator:
     def get_incorrect(self):
         return self.get_incorrect
     
-    def to_json(self):
+    def get_json_col_summary(self):
         pass
 
     def __str__(self):
