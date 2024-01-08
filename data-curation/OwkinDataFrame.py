@@ -1,11 +1,14 @@
 import pandas
-import numpy
+import json
 import pathlib
 import configparser
 from tabulate import tabulate
 import logging
 import time
 from Validator import Validator
+from ValidatorCol import ValidatorCol
+from ValidatorRow import ValidatorRow
+
 
 # set config path
 config_path = pathlib.Path(__file__).parent.absolute() / "config.ini"
@@ -24,13 +27,21 @@ class OwkinDataFrame:
     """
 
     dataframe = ""
+    curated_dataframe = ""
     # types_guess = ""
     json_dataframe = ""
-    nb_rows = ""
-    nb_columns = ""
+    nb_rows = 0
+    nb_columns = 0
     header_list = ""
     types_columns = ""
-    nb_missing_values = ""
+    nb_total = 0
+    nb_valid = 0
+    nb_invalid = 0
+    nb_missing = 0
+    rate_valid = 0
+    rate_invalid = 0
+    rate_missing = 0
+
     col_name_type = {}
 
     row_threshold = 0.1
@@ -38,7 +49,9 @@ class OwkinDataFrame:
 
     df_notnull = ""
 
-    df_json_metadata = {}
+    rows_quality = {}
+    columns_quality = {}
+    dataset_metadata = {}
 
     def __init__(self, csv):
         self.dataframe = self.readcsv_panda(csv)
@@ -51,16 +64,26 @@ class OwkinDataFrame:
         self.df_notnull = self.dataframe.count().to_json()
 
         self.header_list = self.dataframe.columns.values.tolist()
-        self.nb_missing_values = self.dataframe.isna().sum().sum()
-
-        # general summary
-        self.summary_to_json()
+        self.nb_missing = int(self.dataframe.isna().sum().sum())
+        self.nb_total = int(self.dataframe.count().sum()) + self.nb_missing
 
         # col summary + guess type
         self.guess_types_col()
 
         # row summary
-        self.validate_rows(self.dataframe)
+        self.validate_rows()
+
+        self.calculate_rates()
+
+        # general summary
+        self.dataset_metadata()
+        print(self.dataset_json_metadata)
+
+        #test replacing incorrect values by NA
+        self.cure_dataframe()
+        # print(self.curated_dataframe.dtypes)
+
+
 
 
     def readcsv_panda(self, csv_path):
@@ -79,74 +102,89 @@ class OwkinDataFrame:
 
         return df
 
-    def summary_to_json(self):
-        self.df_json_metadata = {
+    def dataset_metadata(self):
+        dataset_metadata = {
             "nb_rows": self.nb_rows,
+            "nb_row_valid": self.nb_row_valid,
             "nb_columns": self.nb_columns,
-            "nb_missing_values": self.nb_missing_values,
+            "nb_total": self.nb_total,
+            "nb_valid": self.nb_valid,
+            "nb_invalid": self.nb_invalid,
+            "nb_missing": self.nb_missing,
+            "rate_valid": self.rate_valid,
+            "rate_invalid": self.rate_invalid,
+            "rate_missing": self.rate_missing,
             "header_list": self.header_list,
-            "columns_report": {},
-            "rows_report": {}
+            "columns_report": self.columns_quality,
+            "rows_report": self.rows_quality
         }
+        self.dataset_metadata = dataset_metadata
+        self.dataset_json_metadata = json.dumps(dataset_metadata)
 
     def guess_types_col(self):
+        """
+        Call ValidatorCol on each column to get a dict report of the column
+        """        
         df = self.dataframe
 
         col_name_type = {}
+        columns_quality = {}
 
+        # nb_values_total =
+        nb_valid = 0
+        nb_invalid = 0
+
+        # run column validation
         for col_name in self.header_list:
-            column_info = Validator(df[col_name])
+            column_validator = ValidatorCol(df[col_name])
             # print(column_info)
-            col_name_type[col_name] = column_info.get_guessed_type()
+            col_name_type[col_name] = column_validator.get_guessed_type()
 
+            columns_quality[col_name] = column_validator.get_column_quality()
+            nb_valid += column_validator.get_nb_valid()
+            nb_invalid += column_validator.get_nb_invalid()
+
+        self.nb_valid = nb_valid
+        self.nb_invalid = nb_invalid
         self.col_name_type = col_name_type
+        self.columns_quality = columns_quality
 
-    def validate_rows(self, df):
-
-        rows_quality = {}
-        for index, row in df.iterrows():
-            nb_valid = 0
-            nb_invalid = 0
-            invalid_values = {}
-            for col_name in self.col_name_type.keys():
-                
-                # Call validate methods here
-                match self.col_name_type[col_name]:
-                    case "Date":
-                        is_valid = Validator.validate_date(row[col_name])
-                    case "Int":
-                        is_valid = Validator.validate_int(row[col_name])
-                    case "Float":
-                        is_valid = Validator.validate_float(row[col_name])
-                    case "Alpha":
-                        is_valid = Validator.validate_alpha(row[col_name])
-                    case "Boolean":
-                        is_valid = Validator.validate_bool(row[col_name])
-                if is_valid:
-                    nb_valid += 1
-                else:
-                    nb_invalid += 1
-                    invalid_values[col_name] = row[col_name]
-
-            is_row_valid = bool(nb_invalid == 0)
-
-            row_summary = {
-                "nb_valid": nb_valid,
-                "nb_invalid": nb_invalid,
-                "is_row_valid": is_row_valid,
-                "invalid_values": invalid_values
-            }
-            rows_quality[index] = row_summary
+    def validate_rows(self):
+        """
+        Call ValidatorRow on each row to get a dict report of the row
+        """        
         
-        print(rows_quality)
-                
+        rows_quality = {}
+        nb_row_valid = 0
+        for index, df_row in self.dataframe.iterrows():
+            row_validator = ValidatorRow(index, df_row, self.col_name_type)
 
+            rows_quality[index] = row_validator.get_row_quality()
+            if row_validator.get_is_row_valid():
+                nb_row_valid += 1
+        
+        self.nb_row_valid = nb_row_valid
+        self.rows_quality = rows_quality
+                
+    def calculate_rates(self):
+        self.rate_valid = round(self.nb_valid / self.nb_total, 4)
+        self.rate_invalid = round(self.nb_invalid / self.nb_total, 4)
+        self.rate_missing = round(self.nb_missing / self.nb_total, 4)
+
+    def cure_dataframe(self):
+        self.curated_dataframe = self.dataframe
+        columns_report = self.dataset_metadata["columns_report"]
+        for col_name in columns_report.keys():
+            for index in columns_report[col_name]["invalid_values"].keys():
+                # print(f"{int(index)} / {col_name}")
+                self.curated_dataframe.loc[int(index), col_name] = pandas.NA
+        self.curated_dataframe.convert_dtypes()
 
     def get_panda_dataframe(self):
         return self.dataframe
 
-    # def get_types_guess(self):
-    #     return self.types_guess
+    def get_col_name_type(self):
+        return self.col_name_type
 
     def get_nb_rows(self):
         return self.nb_rows
@@ -161,7 +199,7 @@ class OwkinDataFrame:
         return self.dataframe.info()
 
     def get_nb_missing(self):
-        return self.nb_missing_values
+        return self.nb_missing
 
     def get_json_df(self):
         return self.json_dataframe
@@ -169,5 +207,5 @@ class OwkinDataFrame:
     def get_not_null(self):
         return self.df_notnull
     
-    def get_json_summary(self):
-        return self.df_json_metadata
+    def get_dataset_metadata(self):
+        return self.dataset_metadata

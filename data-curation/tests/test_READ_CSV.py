@@ -33,7 +33,7 @@ class ReadCSVTestCase(unittest.TestCase):
         data = OwkinDataFrame(self.filepath)
         data.guess_types_col()
 
-        print(data.get_json_summary())
+        # print(data.get_json_summary())
         self.assertEqual(39, data.get_nb_rows())
 
 
