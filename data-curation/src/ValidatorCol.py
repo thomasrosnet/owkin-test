@@ -2,7 +2,7 @@ import pandas
 import time
 import datetime
 import copy
-from Validator import Validator
+from src.Validator import Validator
 
 class ValidatorCol(Validator):
     """

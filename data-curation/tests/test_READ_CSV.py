@@ -3,7 +3,7 @@ import unittest
 import sys
 
 
-from OwkinDataFrame import OwkinDataFrame
+from src.OwkinDataFrame import OwkinDataFrame
 
 
 class ReadCSVTestCase(unittest.TestCase):

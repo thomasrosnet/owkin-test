@@ -1,6 +1,6 @@
 import pandas
 import time
-from Validator import Validator
+from src.Validator import Validator
 
 
 

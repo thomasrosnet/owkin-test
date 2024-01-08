@@ -1,0 +1,61 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+
+<div class="container-xl">
+  <div class="card mb-4 border-bottom">
+
+    <div class="card-body ">
+      <h2 class="card-title">Dataset summary</h2>
+      <p class="card-text">
+
+        <div class="row">
+          <div class="col">
+            <h5>Observations</h5>
+            Observations: {{ data_report.nb_rows }}<br>
+            Valid observations: {{ data_report.nb_rows_valid }}<br>
+            Variables: {{ data_report.nb_columns }}<br>
+          </div>
+          <div class="col">
+            <h5>Entries</h5>
+            Entries: {{ data_report.nb_total }}<br>
+            Valid entries: {{ data_report.nb_valid }}<br>
+            Invalid entries: {{ data_report.nb_invalid }}<br>
+            Missing entries: {{ data_report.nb_missing }}<br>
+          </div>
+          <div class="col">
+            <h5>Variables</h5>
+          </div>
+        </div>
+      </p>
+
+    </div>
+  </div>
+
+
+  <div class="card mb-4 border-bottom">
+
+    <div class="card-body">
+      <h2 class="card-title">Variables summary</h2>
+      <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+
+    </div>
+  </div>
+
+
+  <div class="card">
+
+    <div class="card-body">
+      <h2 class="card-title">Observations summary</h2>
+      <p class="card-text">
+        {{ data_report }}
+      </p>
+
+    </div>
+  </div>
+
+</div>
+
+
+{% endblock %}

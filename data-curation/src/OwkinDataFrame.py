@@ -5,9 +5,9 @@ import configparser
 from tabulate import tabulate
 import logging
 import time
-from Validator import Validator
-from ValidatorCol import ValidatorCol
-from ValidatorRow import ValidatorRow
+from src.Validator import Validator
+from src.ValidatorCol import ValidatorCol
+from src.ValidatorRow import ValidatorRow
 
 
 # set config path
@@ -105,7 +105,7 @@ class OwkinDataFrame:
     def dataset_metadata(self):
         dataset_metadata = {
             "nb_rows": self.nb_rows,
-            "nb_row_valid": self.nb_row_valid,
+            "nb_rows_valid": self.nb_rows_valid,
             "nb_columns": self.nb_columns,
             "nb_total": self.nb_total,
             "nb_valid": self.nb_valid,
@@ -155,15 +155,15 @@ class OwkinDataFrame:
         """        
         
         rows_quality = {}
-        nb_row_valid = 0
+        nb_rows_valid = 0
         for index, df_row in self.dataframe.iterrows():
             row_validator = ValidatorRow(index, df_row, self.col_name_type)
 
             rows_quality[index] = row_validator.get_row_quality()
             if row_validator.get_is_row_valid():
-                nb_row_valid += 1
+                nb_rows_valid += 1
         
-        self.nb_row_valid = nb_row_valid
+        self.nb_rows_valid = nb_rows_valid
         self.rows_quality = rows_quality
                 
     def calculate_rates(self):
