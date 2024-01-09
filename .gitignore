@@ -3,3 +3,4 @@
 **/owkin-env/*
 .vscode
 *.pyc
+**/curation-output/*
