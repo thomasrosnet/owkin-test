@@ -34,6 +34,7 @@ app = Flask(__name__, template_folder='template')
 def index():
     data_folder = "../data/"
     first_file = os.listdir(data_folder)[0]
+    # You can adjust the selection treshold changing the row_treshhold value (between 0 and 1, with 0 accepting nothing)
     data_report = OwkinDataFrame(data_folder + first_file, row_threshold=0.2)
     data_report.cure_dataframe()
 

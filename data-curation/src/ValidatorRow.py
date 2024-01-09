@@ -73,7 +73,7 @@ class ValidatorRow(Validator):
         self.rate_missing = round(self.nb_missing / self.nb_columns, 4)
 
     def is_row_valid(self):
-        self.is_row_valid = bool(self.rate_valid > 1 - self.row_threshold)
+        self.is_row_valid = bool(self.rate_valid >= 1 - self.row_threshold)
         
     def row_quality(self):
         self.row_quality = {
