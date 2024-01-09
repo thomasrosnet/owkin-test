@@ -18,10 +18,11 @@ class ValidatorRow(Validator):
 
     row_quality = {}
 
-    def __init__(self, row_index, df_row, col_name_type):
+    def __init__(self, row_index, df_row, col_name_type, row_threshold = 0.1):
         self.row_index = row_index
         self.df_row = df_row
         self.col_name_type = col_name_type
+        self.row_threshold = row_threshold
 
         # Count missing values in the row
         self.nb_missing = int(self.df_row.apply(super().is_missing).sum())
@@ -56,7 +57,7 @@ class ValidatorRow(Validator):
                 nb_valid += 1
             else:
                 nb_invalid += 1
-                invalid_values[col_name] = self.df_row[col_name]
+                invalid_values[col_name] = str(self.df_row[col_name])
 
 
         self.nb_valid = nb_valid
@@ -89,6 +90,9 @@ class ValidatorRow(Validator):
 
     def get_is_row_valid(self):
         return self.is_row_valid
+    
+    def get_row_treshold(self):
+        return self.row_threshold
 
     def get_row_quality(self):
         return self.row_quality

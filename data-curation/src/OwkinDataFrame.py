@@ -53,8 +53,16 @@ class OwkinDataFrame:
     columns_quality = {}
     dataset_metadata = {}
 
-    def __init__(self, csv):
+    def __init__(self, csv, row_threshold=0.1):
+        """
+        _summary_
+
+        Args:
+            csv (_type_): CSV file with observations as row and columns as variables
+            row_threshold (float, optional): Value range from 0 to 1 (0 Accept every values). Defaults to 0.1.
+        """        
         self.dataframe = self.readcsv_panda(csv)
+        self.row_threshold = row_threshold
 
         self.nb_columns = len(self.dataframe.columns)
         self.nb_rows = len(self.dataframe)
@@ -77,10 +85,10 @@ class OwkinDataFrame:
 
         # general summary
         self.dataset_metadata()
-        print(self.dataset_json_metadata)
+        # print(self.dataset_json_metadata)
 
         #test replacing incorrect values by NA
-        self.cure_dataframe()
+        # self.cure_dataframe()
         # print(self.curated_dataframe.dtypes)
 
 
@@ -114,8 +122,9 @@ class OwkinDataFrame:
             "rate_valid": self.rate_valid,
             "rate_invalid": self.rate_invalid,
             "rate_missing": self.rate_missing,
-            "header_list": self.header_list,
+            "headers_info": self.col_name_type,
             "columns_report": self.columns_quality,
+            "row_treshold": self.row_threshold,
             "rows_report": self.rows_quality
         }
         self.dataset_metadata = dataset_metadata
@@ -157,7 +166,7 @@ class OwkinDataFrame:
         rows_quality = {}
         nb_rows_valid = 0
         for index, df_row in self.dataframe.iterrows():
-            row_validator = ValidatorRow(index, df_row, self.col_name_type)
+            row_validator = ValidatorRow(index, df_row, self.col_name_type, self.row_threshold)
 
             rows_quality[index] = row_validator.get_row_quality()
             if row_validator.get_is_row_valid():
@@ -179,6 +188,7 @@ class OwkinDataFrame:
                 # print(f"{int(index)} / {col_name}")
                 self.curated_dataframe.loc[int(index), col_name] = pandas.NA
         self.curated_dataframe.convert_dtypes()
+        self.curated_dataframe.to_csv('../curation-output/curated_data.csv', index=False)
 
     def get_panda_dataframe(self):
         return self.dataframe

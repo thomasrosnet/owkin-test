@@ -77,6 +77,10 @@ class ValidatorCol(Validator):
                 self.invalid = self.df_column[~self.df_column.apply(super().validate_alpha)].to_dict()
             case "Boolean":
                 self.invalid = self.df_column[~self.df_column.apply(super().validate_bool)].to_dict()
+        
+        # transform invalid to string for javascript handling
+        for key in self.invalid.keys():
+            self.invalid[key] = str(self.invalid[key])
 
 
     def guess_type(self):
@@ -99,6 +103,9 @@ class ValidatorCol(Validator):
         # try describe col depending of its type
         if self.guessed_type == "Alpha":
             self.alpha_unique = self.df_column.unique().tolist()
+            # transform invalid to string for javascript handling
+            for i, value in enumerate(self.alpha_unique):
+                self.alpha_unique[i] = str(value)
 
         # print(self.column_describe)
 

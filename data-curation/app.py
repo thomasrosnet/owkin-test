@@ -17,7 +17,9 @@ from flask import (
     Blueprint,
     url_for,
 )
+import os
 from os import path
+
 
 from src.OwkinDataFrame import OwkinDataFrame
 from src.Validator import Validator
@@ -30,8 +32,10 @@ app = Flask(__name__, template_folder='template')
 
 @app.route("/")
 def index():
-
-    data_report = OwkinDataFrame("../data/fake_dataset_(2).csv")
+    data_folder = "../data/"
+    first_file = os.listdir(data_folder)[0]
+    data_report = OwkinDataFrame(data_folder + first_file, row_threshold=0.2)
+    data_report.cure_dataframe()
 
     return render_template(
         "index.html",

@@ -3,6 +3,8 @@
 {% block content %}
 
 
+
+
 <div class="container-xl">
   <div class="card mb-4 border-bottom">
 
@@ -12,21 +14,58 @@
 
         <div class="row">
           <div class="col">
+            <!-- <h5>Observations</h5> -->
+            <canvas id="chart_observations"></canvas>
+          </div>
+          <div class="col">
             <h5>Observations</h5>
             Observations: {{ data_report.nb_rows }}<br>
             Valid observations: {{ data_report.nb_rows_valid }}<br>
+            Validation treshold: {{ data_report.row_treshold }}<br><br>
+            <h5>Variables</h5>
             Variables: {{ data_report.nb_columns }}<br>
+
           </div>
+
+          <div class="col">
+            <canvas id="chart_entries"></canvas>
+          </div>
+
           <div class="col">
             <h5>Entries</h5>
             Entries: {{ data_report.nb_total }}<br>
             Valid entries: {{ data_report.nb_valid }}<br>
             Invalid entries: {{ data_report.nb_invalid }}<br>
             Missing entries: {{ data_report.nb_missing }}<br>
+            Rate valid entries: {{ data_report.rate_valid }}<br>
+            Rate invalid entries: {{ data_report.rate_invalid }}<br>
+            Rate missing entries: {{ data_report.rate_missing }}<br>
+
           </div>
-          <div class="col">
-            <h5>Variables</h5>
-          </div>
+
+        </div>
+
+        <br>
+        <h5>Variables types</h5>
+        <div class="table-responsive">
+          <table class="table table-bordered" style="white-space: nowrap">
+            <thead>
+              <tr>
+                <!-- <th scope="col">Variables</th> -->
+                {% for key, value in data_report.headers_info.items() %}
+                  <th scope="col">{{key}}</th>
+                {% endfor %}
+              </tr>
+            </thead>
+            <tbody class="table-group-divider">
+              <tr>
+                <!-- <th scope="row">Types</th> -->
+                {% for key, value in data_report.headers_info.items() %}
+                  <td>{{value}}</td>
+                {% endfor %}
+              </tr>
+            </tbody>
+          </table>
         </div>
       </p>
 
@@ -34,14 +73,193 @@
   </div>
 
 
+  <!-- <div class="card mb-4 border-bottom">
+
+    <div class="card-body">
+      <h2 class="card-title">Variables summary</h2>
+      <p class="card-text">
+
+          <table class="table table-bordered" style="white-space: nowrap" id="var_table">
+            <thead>
+              <tr>
+                <th scope="col">Variables</th>
+                {% for key, value in data_report.columns_report.items() %}
+                  <th scope="col">{{key}}</th>
+                {% endfor %}
+              </tr>
+            </thead>
+            <tbody class="table-group-divider">
+              <tr>
+                <th scope="row">Types</th>
+                {% for key, value in data_report.columns_report.items() %}
+                  <td>{{value.type_guess.Type}}</td>
+                {% endfor %}
+              </tr>
+
+              <tr>
+                <th scope="row">Valid</th>
+                {% for key, value in data_report.columns_report.items() %}
+                  <td>{{value.nb_valid}}</td>
+                {% endfor %}
+              </tr>
+
+              <tr>
+                <th scope="row">Invalid</th>
+                {% for key, value in data_report.columns_report.items() %}
+                  <td>{{value.nb_invalid}}</td>
+                {% endfor %}
+              </tr>
+
+              <tr>
+                <th scope="row">Missing</th>
+                {% for key, value in data_report.columns_report.items() %}
+                  <td>{{value.nb_missing}}</td>
+                {% endfor %}
+              </tr>
+
+              <tr>
+                <th scope="row">Invalid entries</th>
+                {% for key, value in data_report.columns_report.items() %}
+                  <td>
+                    <table class="table">
+                      <tbody>
+                        {% for key_entry, value_entry in value.invalid_values.items() %}
+                        <tr>
+                          <td scope="row">{{key_entry}}</td>
+                          <td scope="row">{{value_entry}}</td>
+                        </tr>
+
+                        {% endfor %}
+
+                      </tbody>
+                    </table>
+                  </td>
+                {% endfor %}
+              </tr>
+            </tbody>
+          </table>
+
+
+      </p>
+
+    </div>
+  </div> -->
+
+
   <div class="card mb-4 border-bottom">
 
     <div class="card-body">
       <h2 class="card-title">Variables summary</h2>
-      <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+      <p class="card-text">
+        <!-- <div class="table-responsive"> -->
+        <table class="table table-bordered table-hover" id="var_table_bis">
+          <thead>
+            <tr>
+              <th scope="col">Variable</th>
+              <th scope="col">Type</th>
+              <th scope="col">Valid entries</th>
+              <th scope="col">Describe</th>
+              <th scope="col">Unique</th>
+              <th scope="col">Invalid entries</th>
+              <th scope="col">Missing entries</th>
+              <th scope="col">Invalid/Missing Entries</th>
+
+
+            </tr>
+          </thead>
+          <tbody class="table-group-divider">
+            {% for key, value in data_report.columns_report.items() %}
+            <tr>
+              <th scope="row"  class="align-middle">{{ key }}</th>
+              <td class="align-middle">{{ value.type_guess.Type }}</td>
+              <td class="align-middle">{{ value.nb_valid }}</td>
+              <td class="text-center">
+                <button class="btn btn-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_var_desc{{loop.index}}" aria-expanded="false"><i class="fa fa-plus" aria-hidden="true"></i></button>
+                <div class="collapse" id="collapse_var_desc{{loop.index}}">
+                  <div class="card card-body">
+                    <table class="table">
+                      <thead>
+                        <tr>
+                          <th scope="col"></th>
+                          <th scope="col"></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for key_entry, value_entry in value.describe.items() %}
+                        <tr>
+                          <td scope="row">{{key_entry}}</td>
+                          <td scope="row">{{value_entry}}</td>
+                        </tr>
+                        {% endfor %}
+
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+              </td>
+              <td class="text-center">
+                <button class="btn btn-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_var_uni{{loop.index}}" aria-expanded="false"><i class="fa fa-plus" aria-hidden="true"></i></button>
+                <div class="collapse" id="collapse_var_uni{{loop.index}}">
+                  <div class="card card-body">
+                    <table class="table">
+                      <thead>
+                        <tr>
+                          <th scope="col">Entries</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for value_entry in value.unique %}
+                        <tr>
+                          <td scope="row">{{value_entry}}</td>
+                        </tr>
+                        {% endfor %}
+
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+              </td>
+              <td class="align-middle">{{ value.nb_invalid }}</td>
+              <td class="align-middle">{{ value.nb_missing }}</td>
+              <td class="text-center">
+                <button class="btn btn-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_var_inva{{loop.index}}" aria-expanded="false"><i class="fa fa-plus" aria-hidden="true"></i></button>
+                <div class="collapse" id="collapse_var_inva{{loop.index}}">
+                  <div class="card card-body">
+                    <table class="table">
+                      <thead>
+                        <tr>
+                          <th scope="col">Observation</th>
+                          <th scope="col">Entry</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for key_entry, value_entry in value.invalid_values.items() %}
+                        <tr>
+                          <td scope="row">{{key_entry}}</td>
+                          <td scope="row">{{value_entry}}</td>
+                        </tr>
+                        {% endfor %}
+
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+              </td>
+
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        <!-- </div> -->
+
+      </p>
 
     </div>
   </div>
+
 
 
   <div class="card">
@@ -49,7 +267,64 @@
     <div class="card-body">
       <h2 class="card-title">Observations summary</h2>
       <p class="card-text">
-        {{ data_report }}
+        <!-- <table class="table table-striped table-hover"> -->
+        <table class="table table-bordered table-hover" id="obs_table">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Valid entries</th>
+              <th scope="col">Invalid entries</th>
+              <th scope="col">Missing entries</th>
+              <th scope="col">Invalid/Missing Entries</th>
+              <th scope="col">Rate Valid</th>
+              <th scope="col">Rate Invalid</th>
+              <th scope="col">Rate Missing</th>
+              <!-- <th scope="col">Validation</th> -->
+              <th scope="col">Is Observation Valid</th>
+
+            </tr>
+          </thead>
+          <tbody class="table-group-divider">
+            {% for key, value in data_report.rows_report.items() %}
+            <tr id="observation_row_{{key}}" is_row_valid="{{ value.is_row_valid }}">
+              <th scope="row"  class="align-middle">{{ key }}</th>
+              <td class="align-middle">{{ value.nb_valid }}</td>
+              <td class="align-middle">{{ value.nb_invalid }}</td>
+              <td class="align-middle">{{ value.nb_missing }}</td>
+              <td class="text-center">
+                <button class="btn btn-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_obs_{{key}}" aria-expanded="false" aria-controls="collapse_obs_{{key}}""><i class="fa fa-plus" aria-hidden="true"></i></button>
+                <div class="collapse" id="collapse_obs_{{key}}">
+                  <div class="card card-body">
+                    <table class="table">
+                      <thead>
+                        <tr>
+                          <th scope="col">Variable</th>
+                          <th scope="col">Entry</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for key_entry, value_entry in value.invalid_values.items() %}
+                        <tr>
+                          <td scope="row">{{key_entry}}</td>
+                          <td scope="row">{{value_entry}}</td>
+                        </tr>
+                        {% endfor %}
+
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+                <!-- {{ value.invalid_values }} -->
+              </td>
+              <td class="align-middle">{{ value.rate_valid }}</td>
+              <td class="align-middle">{{ value.rate_invalid }}</td>
+              <td class="align-middle">{{ value.rate_missing }}</td>
+              <!-- <td>{{ value.rate_invalid }} + {{ value.rate_missing }} < {{ data_report.row_treshold }}</td> -->
+              <td class="align-middle">{{ value.is_row_valid }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
       </p>
 
     </div>
@@ -57,5 +332,103 @@
 
 </div>
 
+<!-- {% block javascript %} -->
+<script>
 
+  var collapse_content = $('.collapse');
+  collapse_content.each(function( index ) {
+    var collapsable_div = $( this );
+    var nb_td_in = collapsable_div.find('td').length;
+    if( nb_td_in === 0 ){
+      console.log(collapsable_div.siblings('button'));
+      collapsable_div.siblings('button').prop('disabled', true)
+    }
+  });
+
+
+  // Initialize datatables
+  var var_table = new DataTable('#var_table_bis', {
+    // scrollX: true,
+    ordering: false,
+    pageLength: 25
+  });
+  var obs_table = new DataTable('#obs_table', {
+    // paging: false,
+    // ordering: false,
+    pageLength: 50
+  });
+
+
+
+
+  var data_report = JSON.parse('{{ data_report | tojson | safe}}');
+
+  var nb_row_valid = data_report['nb_rows_valid'];
+  var nb_row_invalid = data_report['nb_rows'] - data_report['nb_rows_valid'];
+
+  // Initialize Chart
+  const ctx1 = document.getElementById('chart_observations');
+  new Chart(ctx1, {
+    type: 'pie',
+    data: {
+      labels: ['Valid', 'Invalid'],
+      datasets: [{
+        label: '# of Observations',
+        data: [nb_row_valid, nb_row_invalid],
+        borderWidth: 1
+      }]
+    },
+    options: {
+
+    }
+  });
+
+  let nb_valid = data_report['nb_valid'];
+  let nb_invalid = data_report['nb_invalid'];
+  let nb_missing = data_report['nb_missing'];
+
+  // Initialize Chart
+  const ctx2 = document.getElementById('chart_entries');
+  new Chart(ctx2, {
+    type: 'pie',
+    data: {
+      labels: ['Valid', 'Invalid', 'Missing'],
+      datasets: [{
+        label: '# of Entries',
+        data: [nb_valid, nb_invalid, nb_missing],
+        borderWidth: 1
+      }]
+    },
+    options: {
+      // scales: {
+      //   y: {
+      //     beginAtZero: true
+      //   }
+      // }
+    }
+  });
+
+
+
+
+  $(document).ready(function(){
+
+    var observation_rows = $('[id^=observation_row_]');
+    var length = observation_rows.length;
+
+    observation_rows.each(function( index ) {
+      var is_obs_valid = $( this ).attr('is_row_valid');
+      if (is_obs_valid === "True"){
+        // $( this ).children('td, th').css("background-color", "#eff0ff");
+      } else {
+        $( this ).children('td, th').css("background-color", "#ffe9e9");
+      }
+    });
+
+
+  });
+
+
+</script>
+<!-- {% endblock %} -->
 {% endblock %}
