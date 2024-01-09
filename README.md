@@ -1,6 +1,6 @@
 # Owkin test project
 
-To run this project you must run the following commands:
+To run this project you must run the following commands in a Linux shell:
 
 ```
 git clone https://github.com/thomasrosnet/owkin-test.git
@@ -25,3 +25,7 @@ The test data file is not commited to the Github repository !
 For the moment the code generate the Web UI using only the first file listed in the "data" folder.
 
 A curated file will be generated when the Web UI load, and can be find in the "curation-output" folder.
+
+## Information
+
+In the app.py file you can adjust the treshold (float between 1 and 0, with 0 accepting nothing)
