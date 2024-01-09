@@ -20,15 +20,11 @@ config.read(config_path)
 
 class OwkinDataFrame:
     """
-    _summary_
-
-    Returns:
-        _type_: _description_
+    Class handling the dataframe object metadata
     """
 
     dataframe = ""
     curated_dataframe = ""
-    # types_guess = ""
     json_dataframe = ""
     nb_rows = 0
     nb_columns = 0
@@ -55,12 +51,12 @@ class OwkinDataFrame:
 
     def __init__(self, csv, row_threshold=0.1):
         """
-        _summary_
+        Constructor
 
         Args:
-            csv (_type_): CSV file with observations as row and columns as variables
+            csv (str): CSV file path with observations as row and columns as variables
             row_threshold (float, optional): Value range from 0 to 1 (0 Accept every values). Defaults to 0.1.
-        """        
+        """
         self.dataframe = self.readcsv_panda(csv)
         self.row_threshold = row_threshold
 
@@ -85,32 +81,32 @@ class OwkinDataFrame:
 
         # general summary
         self.dataset_metadata()
-        # print(self.dataset_json_metadata)
 
-        #test replacing incorrect values by NA
+        # test replacing incorrect values by NA
         # self.cure_dataframe()
         # print(self.curated_dataframe.dtypes)
 
-
-
-
     def readcsv_panda(self, csv_path):
-        # data_folder = "../data/"
+        """
+        _summary_
+
+        Args:
+            csv_path (str): CSV Path
+
+        Returns:
+            Pandas_DF: Dataframe
+        """
+
         logging.debug(csv_path)
         df = pandas.read_csv(csv_path, sep=";")
-        # df = pandas.read_csv("data/fake_dataset_(2).csv", sep=";")
-
-        # displaying the DataFrame
-        # print(tabulate(df, headers = 'keys', tablefmt = 'psql'))
-
-        logging.info(len(df.columns))
         logging.debug(len(df))
-        logging.info(len(df))
-        # print(len(df))
 
         return df
 
     def dataset_metadata(self):
+        """
+        Serialize metadata into a JSON object
+        """
         dataset_metadata = {
             "nb_rows": self.nb_rows,
             "nb_rows_valid": self.nb_rows_valid,
@@ -125,7 +121,7 @@ class OwkinDataFrame:
             "headers_info": self.col_name_type,
             "columns_report": self.columns_quality,
             "row_treshold": self.row_threshold,
-            "rows_report": self.rows_quality
+            "rows_report": self.rows_quality,
         }
         self.dataset_metadata = dataset_metadata
         self.dataset_json_metadata = json.dumps(dataset_metadata)
@@ -133,7 +129,7 @@ class OwkinDataFrame:
     def guess_types_col(self):
         """
         Call ValidatorCol on each column to get a dict report of the column
-        """        
+        """
         df = self.dataframe
 
         col_name_type = {}
@@ -161,34 +157,43 @@ class OwkinDataFrame:
     def validate_rows(self):
         """
         Call ValidatorRow on each row to get a dict report of the row
-        """        
-        
+        """
+
         rows_quality = {}
         nb_rows_valid = 0
         for index, df_row in self.dataframe.iterrows():
-            row_validator = ValidatorRow(index, df_row, self.col_name_type, self.row_threshold)
+            row_validator = ValidatorRow(
+                index, df_row, self.col_name_type, self.row_threshold
+            )
 
             rows_quality[index] = row_validator.get_row_quality()
             if row_validator.get_is_row_valid():
                 nb_rows_valid += 1
-        
+
         self.nb_rows_valid = nb_rows_valid
         self.rows_quality = rows_quality
-                
+
     def calculate_rates(self):
+        """
+        Generates validity rates
+        """
         self.rate_valid = round(self.nb_valid / self.nb_total, 4)
         self.rate_invalid = round(self.nb_invalid / self.nb_total, 4)
         self.rate_missing = round(self.nb_missing / self.nb_total, 4)
 
     def cure_dataframe(self):
+        """
+        Cure the dataframe by changing all incorrect values to NA (need to be improved to correct values into usable ones)
+        """
         self.curated_dataframe = self.dataframe
         columns_report = self.dataset_metadata["columns_report"]
         for col_name in columns_report.keys():
             for index in columns_report[col_name]["invalid_values"].keys():
-                # print(f"{int(index)} / {col_name}")
                 self.curated_dataframe.loc[int(index), col_name] = pandas.NA
         self.curated_dataframe.convert_dtypes()
-        self.curated_dataframe.to_csv('../curation-output/curated_data.csv', index=False)
+        self.curated_dataframe.to_csv(
+            "../curation-output/curated_data.csv", index=False
+        )
 
     def get_panda_dataframe(self):
         return self.dataframe
@@ -216,6 +221,6 @@ class OwkinDataFrame:
 
     def get_not_null(self):
         return self.df_notnull
-    
+
     def get_dataset_metadata(self):
         return self.dataset_metadata

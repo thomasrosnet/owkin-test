@@ -10,7 +10,6 @@ class ReadCSVTestCase(unittest.TestCase):
     filepath = "data/fake_dataset_(2).csv"
 
     def test_readcsv(self):
-        # print("test")
         data = OwkinDataFrame(self.filepath)
         # print(data.get_types_columns())
 
@@ -23,19 +22,12 @@ class ReadCSVTestCase(unittest.TestCase):
         self.assertEqual(39, data.get_nb_rows())
         self.assertEqual(24, data.get_nb_missing())
 
-    # def test_radcsv_messytable(self):
-    #     data = OwkinDataFrame(self.filepath)
-    #     print(data.get_types_guess)
-
-    #     self.assertEqual(38, data.get_nb_row())
-
     def test_validator(self):
         data = OwkinDataFrame(self.filepath)
         data.guess_types_col()
 
         # print(data.get_json_summary())
         self.assertEqual(39, data.get_nb_rows())
-
 
 
 if __name__ == "__main__":

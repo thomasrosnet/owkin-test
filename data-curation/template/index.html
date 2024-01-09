@@ -28,18 +28,18 @@
           </div>
 
           <div class="col">
-            <canvas id="chart_entries"></canvas>
+            <canvas id="chart_values"></canvas>
           </div>
 
           <div class="col">
-            <h5>Entries</h5>
-            Entries: {{ data_report.nb_total }}<br>
-            Valid entries: {{ data_report.nb_valid }}<br>
-            Invalid entries: {{ data_report.nb_invalid }}<br>
-            Missing entries: {{ data_report.nb_missing }}<br>
-            Rate valid entries: {{ data_report.rate_valid }}<br>
-            Rate invalid entries: {{ data_report.rate_invalid }}<br>
-            Rate missing entries: {{ data_report.rate_missing }}<br>
+            <h5>Values</h5>
+            Values: {{ data_report.nb_total }}<br>
+            Valid values: {{ data_report.nb_valid }}<br>
+            Invalid values: {{ data_report.nb_invalid }}<br>
+            Missing values: {{ data_report.nb_missing }}<br>
+            Rate valid values: {{ data_report.rate_valid }}<br>
+            Rate invalid values: {{ data_report.rate_invalid }}<br>
+            Rate missing values: {{ data_report.rate_missing }}<br>
 
           </div>
 
@@ -157,12 +157,12 @@
             <tr>
               <th scope="col">Variable</th>
               <th scope="col">Type</th>
-              <th scope="col">Valid entries</th>
+              <th scope="col">Valid values</th>
               <th scope="col">Describe</th>
               <th scope="col">Unique</th>
-              <th scope="col">Invalid entries</th>
-              <th scope="col">Missing entries</th>
-              <th scope="col">Invalid/Missing Entries</th>
+              <th scope="col">Invalid values</th>
+              <th scope="col">Missing values</th>
+              <th scope="col">Invalid/Missing Values</th>
 
 
             </tr>
@@ -205,7 +205,7 @@
                     <table class="table">
                       <thead>
                         <tr>
-                          <th scope="col">Entries</th>
+                          <th scope="col">Values</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -272,10 +272,10 @@
           <thead>
             <tr>
               <th scope="col">#</th>
-              <th scope="col">Valid entries</th>
-              <th scope="col">Invalid entries</th>
-              <th scope="col">Missing entries</th>
-              <th scope="col">Invalid/Missing Entries</th>
+              <th scope="col">Valid values</th>
+              <th scope="col">Invalid values</th>
+              <th scope="col">Missing values</th>
+              <th scope="col">Invalid/Missing Values</th>
               <th scope="col">Rate Valid</th>
               <th scope="col">Rate Invalid</th>
               <th scope="col">Rate Missing</th>
@@ -388,13 +388,13 @@
   let nb_missing = data_report['nb_missing'];
 
   // Initialize Chart
-  const ctx2 = document.getElementById('chart_entries');
+  const ctx2 = document.getElementById('chart_values');
   new Chart(ctx2, {
     type: 'pie',
     data: {
       labels: ['Valid', 'Invalid', 'Missing'],
       datasets: [{
-        label: '# of Entries',
+        label: '# of Values',
         data: [nb_valid, nb_invalid, nb_missing],
         borderWidth: 1
       }]

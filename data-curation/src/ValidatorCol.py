@@ -4,6 +4,7 @@ import datetime
 import copy
 from src.Validator import Validator
 
+
 class ValidatorCol(Validator):
     """
     _summary_
@@ -35,7 +36,6 @@ class ValidatorCol(Validator):
         self.df_column = df_column
         self.df_column_name = df_column.name
 
-
         # Count missing values in the colum
         self.nb_missing = int(self.df_column.apply(super().is_missing).sum())
 
@@ -58,30 +58,32 @@ class ValidatorCol(Validator):
 
         self.column_quality()
 
-
-
-
-
-    def select_missing(self):
-        pass
-
     def select_invalid(self):
         match self.guessed_type:
             case "Date":
-                self.invalid = self.df_column[~self.df_column.apply(super().validate_date)].to_dict()
+                self.invalid = self.df_column[
+                    ~self.df_column.apply(super().validate_date)
+                ].to_dict()
             case "Int":
-                self.invalid = self.df_column[~self.df_column.apply(super().validate_int)].to_dict()
+                self.invalid = self.df_column[
+                    ~self.df_column.apply(super().validate_int)
+                ].to_dict()
             case "Float":
-                self.invalid = self.df_column[~self.df_column.apply(super().validate_float)].to_dict()
+                self.invalid = self.df_column[
+                    ~self.df_column.apply(super().validate_float)
+                ].to_dict()
             case "Alpha":
-                self.invalid = self.df_column[~self.df_column.apply(super().validate_alpha)].to_dict()
+                self.invalid = self.df_column[
+                    ~self.df_column.apply(super().validate_alpha)
+                ].to_dict()
             case "Boolean":
-                self.invalid = self.df_column[~self.df_column.apply(super().validate_bool)].to_dict()
-        
+                self.invalid = self.df_column[
+                    ~self.df_column.apply(super().validate_bool)
+                ].to_dict()
+
         # transform invalid to string for javascript handling
         for key in self.invalid.keys():
             self.invalid[key] = str(self.invalid[key])
-
 
     def guess_type(self):
         types_summary = {
@@ -96,7 +98,6 @@ class ValidatorCol(Validator):
         self.max_score = types_summary[self.guessed_type]
         self.invalid_miss = len(self.df_column) - self.max_score
 
-        # do something with it
         types_summary["Type"] = self.guessed_type
         self.types_summary = types_summary
 
@@ -107,12 +108,9 @@ class ValidatorCol(Validator):
             for i, value in enumerate(self.alpha_unique):
                 self.alpha_unique[i] = str(value)
 
-        # print(self.column_describe)
-
-    
     def count_invalid(self):
         self.nb_invalid = self.invalid_miss - self.nb_missing
-        #TODO add incorrect %
+        # TODO add incorrect %
 
     def count_valid(self):
         self.nb_valid = len(self.df_column) - self.invalid_miss
@@ -124,9 +122,8 @@ class ValidatorCol(Validator):
 
     def def_describe_column_on_type(self):
         self.replace_invalid_NA()
-        # print(self.df_column)
 
-        describe = {}
+        # describe = {}
         match self.guessed_type:
             case "Date":
                 # self.df_column_describe = pandas.to_datetime(self.df_column_describe, format="%d/%m/%Y")
@@ -138,7 +135,9 @@ class ValidatorCol(Validator):
                 # self.df_column_describe.astype = self.df_column_describe.astype(pandas.Float64Dtype())
                 self.df_column_describe = pandas.to_numeric(self.df_column_describe)
             case "Alpha":
-                self.df_column_describe.astype = self.df_column_describe.astype(pandas.StringDtype())
+                self.df_column_describe.astype = self.df_column_describe.astype(
+                    pandas.StringDtype()
+                )
             case "Boolean":
                 self.df_column_describe.astype = self.df_column_describe.astype(bool)
 
@@ -156,15 +155,15 @@ class ValidatorCol(Validator):
         #             desc[key] = datetime.datetime.strptime(str(desc[key]), '%Y-%m-%d %H:%M:%S.%f').strftime("%d/%m/%Y")
         #         except ValueError as e:
         #             # print(e)
-        #             continue                
+        #             continue
         #     self.column_describe = desc
         # else:
         self.column_describe = self.df_column_describe.describe().to_dict()
 
-
-    #TODO write the column summary in dict format
     def column_quality(self):
-
+        """
+        Serialize column quality report in JSON format
+        """
         column_quality = {
             "type_guess": self.types_summary,
             "nb_valid": self.nb_valid,
@@ -172,11 +171,10 @@ class ValidatorCol(Validator):
             "nb_invalid": self.nb_invalid,
             "invalid_values": self.invalid,
             "unique": self.alpha_unique,
-            "describe": self.column_describe
+            "describe": self.column_describe,
         }
 
         self.column_quality = column_quality
-
 
     def get_date_score(self):
         return self.date_score
@@ -210,13 +208,13 @@ class ValidatorCol(Validator):
 
     def get_invalid_miss(self):
         return self.invalid_miss
-    
+
     def get_invalid(self):
         return self.get_invalid
-    
+
     def get_types_summary(self):
         return self.types_summary
-    
+
     def get_column_quality(self):
         return self.column_quality
 

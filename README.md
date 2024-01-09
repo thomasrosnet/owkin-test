@@ -29,3 +29,6 @@ A curated file will be generated when the Web UI load, and can be find in the "c
 ## Information
 
 In the app.py file you can adjust the treshold (float between 1 and 0, with 0 accepting nothing)
+The rate is "valid" values in the row against missing+incorrect.
+Can be seen as a percentage of correct/incorrect values.
+Rates could be converted to percentages for more readability in the GUI.

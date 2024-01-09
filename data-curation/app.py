@@ -1,8 +1,10 @@
 import sys
+
 # setting path
-sys.path.append('../data-curation')
+sys.path.append("../data-curation")
 datacuration = __import__("data-curation")
 import importlib
+
 # mod = importlib.import_module("../data-curation")
 
 import configparser
@@ -27,7 +29,7 @@ from src.ValidatorCol import ValidatorCol
 from src.ValidatorRow import ValidatorRow
 
 # basedir = path.abspath(path.dirname(__file__))
-app = Flask(__name__, template_folder='template')
+app = Flask(__name__, template_folder="template")
 
 
 @app.route("/")
@@ -38,11 +40,8 @@ def index():
     data_report = OwkinDataFrame(data_folder + first_file, row_threshold=0.2)
     data_report.cure_dataframe()
 
-    return render_template(
-        "index.html",
-        data_report = data_report.get_dataset_metadata()
-    )
+    return render_template("index.html", data_report=data_report.get_dataset_metadata())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(debug=True)

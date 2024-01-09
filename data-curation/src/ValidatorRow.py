@@ -3,9 +3,7 @@ import time
 from src.Validator import Validator
 
 
-
 class ValidatorRow(Validator):
-
     row_index = ""
     df_row = ""
     col_name_type = ""
@@ -18,7 +16,7 @@ class ValidatorRow(Validator):
 
     row_quality = {}
 
-    def __init__(self, row_index, df_row, col_name_type, row_threshold = 0.1):
+    def __init__(self, row_index, df_row, col_name_type, row_threshold=0.1):
         self.row_index = row_index
         self.df_row = df_row
         self.col_name_type = col_name_type
@@ -28,19 +26,16 @@ class ValidatorRow(Validator):
         self.nb_missing = int(self.df_row.apply(super().is_missing).sum())
         self.nb_columns = len(df_row)
 
-
         self.validate_row()
         self.calculate_rates()
         self.is_row_valid()
         self.row_quality()
-
 
     def validate_row(self):
         nb_valid = 0
         nb_invalid = 0
         invalid_values = {}
         for col_name in self.col_name_type.keys():
-            
             # Call validate methods here
             match self.col_name_type[col_name]:
                 case "Date":
@@ -59,11 +54,9 @@ class ValidatorRow(Validator):
                 nb_invalid += 1
                 invalid_values[col_name] = str(self.df_row[col_name])
 
-
         self.nb_valid = nb_valid
         self.nb_invalid = nb_invalid - self.nb_missing
         self.invalid_values = invalid_values
-
 
         # self.row_quality[self.row_index] = row_summary
 
@@ -73,9 +66,15 @@ class ValidatorRow(Validator):
         self.rate_missing = round(self.nb_missing / self.nb_columns, 4)
 
     def is_row_valid(self):
+        """
+        Check if row meet the threshold
+        """
         self.is_row_valid = bool(self.rate_valid >= 1 - self.row_threshold)
-        
+
     def row_quality(self):
+        """
+        Serialize row quality report in JSON format
+        """
         self.row_quality = {
             "nb_valid": self.nb_valid,
             "nb_invalid": self.nb_invalid,
@@ -85,15 +84,14 @@ class ValidatorRow(Validator):
             "rate_missing": self.rate_missing,
             "row_threshold": self.row_threshold,
             "is_row_valid": self.is_row_valid,
-            "invalid_values": self.invalid_values
+            "invalid_values": self.invalid_values,
         }
 
     def get_is_row_valid(self):
         return self.is_row_valid
-    
+
     def get_row_treshold(self):
         return self.row_threshold
 
     def get_row_quality(self):
         return self.row_quality
-    
